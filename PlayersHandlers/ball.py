@@ -4,7 +4,7 @@ from pygame.locals import *
 
 class Ball:
 
-    MaxVELOCITY = 100
+    MaxVELOCITY = 50
 
     def __init__(self, xVelocity):
 

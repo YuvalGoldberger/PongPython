@@ -31,8 +31,8 @@ class Button:
         font = pygame.font.Font(r'D:\Yuval_Python\Yuval Final Proj\Game\Fonts\Assistant-ExtraBold.ttf', 35)
         stateText = font.render(state, 1, (50, 255, 20))
 
-        if state == "AI":
-            pygame.display.get_surface().blit(stateText, ((self.screenWidth / 2) - 10, self.screenHeight - 60))
+        if state == "Offline":
+            pygame.display.get_surface().blit(stateText, ((self.screenWidth / 2) - 60, self.screenHeight - 60))
         elif state == "MultiPlayer":      
             pygame.display.get_surface().blit(stateText, ((self.screenWidth / 2) - 80, self.screenHeight - 60))
         elif state == "Impossible":      

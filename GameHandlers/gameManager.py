@@ -13,12 +13,14 @@ class GameManager:
     def __init__(self):
         self.firstPlayer = Player(30)
         self.secondPlayer = Player(1210)
-        self.ball = Ball(random.choice((-5, 5)))
+        self.ball = Ball(random.choice((-7, 7)))
         self.impossiblePlayer = Impossible(self.secondPlayer, self.ball)
         self.screenHeight = pygame.display.get_surface().get_height()
         self.screenWidth = pygame.display.get_surface().get_width()
         self.firstPlayerPoints = 0
         self.secondPlayerPoints = 0
+
+        self.canSelect = True
         
         
     def checkCollision(self):
@@ -28,16 +30,19 @@ class GameManager:
         #  Screen Limit (y) Colission
         if self.ball.y + self.ball.RADIUS >= self.screenHeight:
             self.ball.yVelocity *= -1
+            self.ball.y -= 5
 
         elif self.ball.y - self.ball.RADIUS <= 0:
             self.ball.yVelocity *= -1
+            self.ball.y += 5
 
         #  Ball Collision
         if ((self.ball.x - self.ball.RADIUS <= self.firstPlayer.x + playerWidth) and (self.ball.x - self.ball.RADIUS >= self.firstPlayer.x)) and \
              (self.ball.y >= self.firstPlayer.y and self.ball.y <= self.firstPlayer.y + playerHeight):
-            if self.ball.xVelocity > 30:
-                self.ball.xVelocity += 8
+            if self.ball.xVelocity < self.ball.MaxVELOCITY:
+                self.ball.xVelocity -= 0.2
             self.ball.xVelocity *= -1
+            self.ball.x += 10
 
             #  Choose yVelocity of the ball after colission, depends on hit location (above middle will go up, beneath middle will go down)
             midY = self.firstPlayer.y + playerHeight / 2
@@ -48,26 +53,30 @@ class GameManager:
 
         if ((self.ball.x + self.ball.RADIUS >= self.secondPlayer.x) and (self.ball.x + self.ball.RADIUS <= self.secondPlayer.x + playerWidth)) and \
             (self.ball.y >= self.secondPlayer.y and self.ball.y <= self.secondPlayer.y + playerHeight):
-            if self.ball.xVelocity < -30:
-                self.ball.xVelocity -= 8
+            if self.ball.xVelocity < -1 * self.ball.MaxVELOCITY:
+                self.ball.xVelocity += 0.2
             self.ball.xVelocity *= -1
+            self.ball.x -= 10
+
             #  Choose yVelocity of the ball after colission, depends on hit location (above middle will go up, beneath middle will go down)
             midY = self.secondPlayer.y + playerHeight / 2
             subY = midY - self.ball.y
             reductionFactor = (playerHeight / 2) / self.ball.xVelocity
             self.ball.yVelocity = -1 * subY / reductionFactor
 
-        #  Lose (x Colission)
+        #  Goal (x Colission)
         if self.ball.x + self.ball.RADIUS >= self.screenWidth:
-            self.ball.__init__(5)
+            self.ball.__init__(7)
             self.firstPlayer.__init__(self.firstPlayer.x)
             self.secondPlayer.__init__(self.secondPlayer.x)
             self.firstPlayerPoints += 1
+            self.canSelect = True
         if self.ball.x + self.ball.RADIUS <= 0:
-            self.ball.__init__(-5)
+            self.ball.__init__(-7)
             self.firstPlayer.__init__(self.firstPlayer.x)
             self.secondPlayer.__init__(self.secondPlayer.x)
             self.secondPlayerPoints += 1
+            self.canSelect = True
     
     def madeByDisplay(self):
         font = pygame.font.Font(r'D:\Yuval_Python\Yuval Final Proj\Game\Fonts\Assistant-ExtraBold.ttf', 35)
