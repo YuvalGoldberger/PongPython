@@ -1,5 +1,8 @@
 import socket
 import threading
+from gui import GUI
+import pygame
+from pygame.locals import *
 
 class Server:
 
@@ -24,6 +27,10 @@ class Server:
         if len(clientList) == 2:
             playersInMatch += clientList
             clientList = []
+        if len(playersInMatch == 2):
+            self.match(playersInMatch)
+            playersInMatch = []
+            
         else:
             clientList.append(client)
         while True:
@@ -41,3 +48,13 @@ class Server:
                         client.send(f'You sent: {msg}'.encode())
             except:
                 break
+
+    def match(self, playersList):
+        gui = GUI()
+        data = pygame.image.tostring(gui.image, "RGB")
+        while True:
+            for player in playersList:
+                player.send(data)
+
+
+        pass
