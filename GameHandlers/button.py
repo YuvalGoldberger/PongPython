@@ -1,7 +1,9 @@
 import pygame
 from pygame.locals import *
 
+from config import Config
 class Button:
+    
     def __init__(self, imgLoc, x, y):
         self.x = x
         self.y = y
@@ -13,7 +15,7 @@ class Button:
         self.screenHeight = self.surface.get_height()
         self.screenWidth = self.surface.get_width()
 
-
+        self.FOLDER_LOCATION = Config().FOLDER_LOCATION
         img = pygame.image.load(self.imgLocation).convert_alpha()
         self.surface.blit(img, (self.x, self.y))
 
@@ -28,7 +30,7 @@ class Button:
             return False
 
     def displayState(self, state):
-        font = pygame.font.Font(r'D:\Yuval_Python\Yuval Final Proj\Game\Fonts\Assistant-ExtraBold.ttf', 35)
+        font = pygame.font.Font(rf'{self.FOLDER_LOCATION}\Fonts\Assistant-ExtraBold.ttf', 35)
         stateText = font.render(state, 1, (50, 255, 20))
 
         if state == "Offline":

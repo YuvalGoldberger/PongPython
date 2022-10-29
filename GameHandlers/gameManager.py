@@ -6,14 +6,17 @@ from PlayersHandlers.player import Player
 from PlayersHandlers.ball import Ball
 
 from GameHandlers.impossible import Impossible
+from config import Config
 
 class GameManager:
     pygame.font.init()
+    FOLDER_LOCATION = Config().FOLDER_LOCATION
 
     def __init__(self):
         self.firstPlayer = Player(30)
         self.secondPlayer = Player(1210)
-        self.ball = Ball(random.choice((-7, 7)))
+        self.BALL_SPEED = Config().BALL_SPEED
+        self.ball = Ball(random.choice((-1* self.BALL_SPEED, self.BALL_SPEED)))
         self.impossiblePlayer = Impossible(self.secondPlayer, self.ball)
         self.screenHeight = pygame.display.get_surface().get_height()
         self.screenWidth = pygame.display.get_surface().get_width()
@@ -66,26 +69,26 @@ class GameManager:
 
         #  Goal (x Colission)
         if self.ball.x + self.ball.RADIUS >= self.screenWidth:
-            self.ball.__init__(7)
+            self.ball.__init__(self.BALL_SPEED)
             self.firstPlayer.__init__(self.firstPlayer.x)
             self.secondPlayer.__init__(self.secondPlayer.x)
             self.firstPlayerPoints += 1
             self.canSelect = True
         if self.ball.x + self.ball.RADIUS <= 0:
-            self.ball.__init__(-7)
+            self.ball.__init__(-1 * self.BALL_SPEED)
             self.firstPlayer.__init__(self.firstPlayer.x)
             self.secondPlayer.__init__(self.secondPlayer.x)
             self.secondPlayerPoints += 1
             self.canSelect = True
     
     def madeByDisplay(self):
-        font = pygame.font.Font(r'D:\Yuval_Python\Yuval Final Proj\Game\Fonts\Assistant-ExtraBold.ttf', 35)
+        font = pygame.font.Font(rf'{self.FOLDER_LOCATION}\Fonts\Assistant-ExtraBold.ttf', 35)
         madeByText = font.render("This game has been created by Yuval Goldberger!", 1, (50, 255, 20))
         pygame.display.get_surface().blit(madeByText, ((self.screenWidth / 2) - 380, 20))
 
     def scoreDisplay(self):
-        scoreFont = pygame.font.Font(r'D:\Yuval_Python\Yuval Final Proj\Game\Fonts\Assistant-ExtraBold.ttf', 50)
-        pointFont = pygame.font.Font(r'D:\Yuval_Python\Yuval Final Proj\Game\Fonts\Assistant-Medium.ttf', 30)
+        scoreFont = pygame.font.Font(rf'{self.FOLDER_LOCATION}\Fonts\Assistant-ExtraBold.ttf', 50)
+        pointFont = pygame.font.Font(rf'{self.FOLDER_LOCATION}\Fonts\Assistant-Medium.ttf', 30)
         scoreText = scoreFont.render("SCORE", 1, (255, 255, 255))
         firstPointsTtext = pointFont.render(str(self.firstPlayerPoints), 1, (255, 255, 255))
         secondPointsTtext = pointFont.render(str(self.secondPlayerPoints), 1, (255, 255, 255))
@@ -96,7 +99,7 @@ class GameManager:
     
     def startingGameAlert(self):
 
-        font = pygame.font.Font(r'D:\Yuval_Python\Yuval Final Proj\Game\Fonts\Assistant-Bold.ttf', 30)
+        font = pygame.font.Font(rf'{self.FOLDER_LOCATION}\Fonts\Assistant-Bold.ttf', 30)
         pressEnterText = font.render("Press ENTER to start the game!", 1, (255, 255, 255))
         pygame.display.get_surface().blit(pressEnterText, ((self.screenWidth / 2) - 200, (self.screenHeight / 2) - 75 ))
 

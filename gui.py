@@ -4,10 +4,12 @@ from pygame.locals import *
 from GameHandlers.button import Button
 from GameHandlers.gameManager import GameManager
 
-
+from config import Config
 class GUI:
+    FOLDER_LOCATION = Config().FOLDER_LOCATION
     WIDTH = 1270
     HEIGHT = 720
+    
 
     def __init__(self):
         pygame.init()
@@ -25,10 +27,10 @@ class GUI:
         self.sentName = False
         self.name = ''
         uppercase = False
-        boldFont = pygame.font.Font(r'D:\Yuval_Python\Yuval Final Proj\Game\Fonts\Assistant-ExtraBold.ttf', 35)
-        mediumFont = pygame.font.Font(r'D:\Yuval_Python\Yuval Final Proj\Game\Fonts\Assistant-Medium.ttf', 20)
+        boldFont = pygame.font.Font(fr'{self.FOLDER_LOCATION}\Fonts\Assistant-ExtraBold.ttf', 35)
+        mediumFont = pygame.font.Font(fr'{self.FOLDER_LOCATION}\Fonts\Assistant-Medium.ttf', 20)
         
-        sendNameButton = Button(r'D:\Yuval_Python\Yuval Final Proj\Game\Images\EnterName.png', self.WIDTH / 2 - 100, self.HEIGHT / 2 + 100)
+        sendNameButton = Button(fr'{self.FOLDER_LOCATION}\Images\EnterName.png', self.WIDTH / 2 - 100, self.HEIGHT / 2 + 100)
 
 
         enterName = boldFont.render("Enter Name", 1, (255, 255, 255))
@@ -81,11 +83,11 @@ class GUI:
         self.ball = self.gameManager.ball
         impossiblePlayer = self.gameManager.impossiblePlayer
 
-        self.buttonMultiPlayer = Button(r'D:\Yuval_Python\Yuval Final Proj\Game\Images\MultiPlayer.png',
+        self.buttonMultiPlayer = Button(fr'{self.FOLDER_LOCATION}\Images\MultiPlayer.png',
                                      self.WIDTH / 2 + 100, self.HEIGHT / 2 + 100)
-        self.buttonOffline = Button(r'D:\Yuval_Python\Yuval Final Proj\Game\Images\Offline.png', 
+        self.buttonOffline = Button(fr'{self.FOLDER_LOCATION}\Images\Offline.png', 
                             self.WIDTH / 2 - 100, self.HEIGHT / 2 + 200)
-        self.buttonImpossible = Button(r'D:\Yuval_Python\Yuval Final Proj\Game\Images\Impossible.png', 
+        self.buttonImpossible = Button(fr'{self.FOLDER_LOCATION}\Images\Impossible.png', 
                             self.WIDTH / 2 - 300, self.HEIGHT / 2 + 100)
         
         pygame.display.flip()
@@ -160,5 +162,5 @@ class GUI:
             self.firstPlayer.drawPlayer()
             self.secondPlayer.drawPlayer()
             
-            self.image = self.surface.blit((0, 0, 0))
             pygame.display.flip()
+GUI()
