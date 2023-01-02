@@ -3,7 +3,6 @@ import pygame
 from pygame.locals import *
 from config import Config
 
-
 class Ball:
 
     MaxVELOCITY = 50

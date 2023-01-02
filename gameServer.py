@@ -3,7 +3,6 @@
 import socket
 import threading
 import random
-from config import Config
 from PlayersHandlers.ball import Ball
 from GameHandlers.gameManager import GameManager
 import time

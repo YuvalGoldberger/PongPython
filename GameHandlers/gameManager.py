@@ -1,7 +1,6 @@
 import pygame
 from pygame.locals import *
 
-from PlayersHandlers.player import Player
 from PlayersHandlers.ball import Ball
 
 from config import Config
