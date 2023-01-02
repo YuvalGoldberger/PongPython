@@ -1,10 +1,18 @@
+import socket
+import threading
+import time
+
 import pygame
 from pygame.locals import *
 
-from GameHandlers.button import Button
-from GameHandlers.gameManager import GameManager
+from PlayersHandlers.ball import Ball
+from PlayersHandlers.player import Player
 
 from config import Config
+
+import socket
+import threading
+
 class GUI:
     FOLDER_LOCATION = Config().FOLDER_LOCATION
     WIDTH = 1270
@@ -12,155 +20,124 @@ class GUI:
     
 
     def __init__(self):
-        pygame.init()
+        '''
+        Initiate GUI and connect client to server.
+        '''
         
+        pygame.init()
+        self.client= socket.socket()
+        self.client.connect(('192.168.1.153',2000))
+
+        gameData = self.client.recv(1024).decode().split(':')
+ 
+        # eval() to turn '(1, 2, 3)' to (1, 2, 3)
+        self.playerNum = gameData[0]
+        self.rightPlayerColor = eval(gameData[1])
+        self.leftPlayerColor = eval(gameData[2])
+
+        print(self.playerNum)
+        self.client.send(self.playerNum.encode())
+        self.playerNum = int(self.playerNum)
         
         self.surface = pygame.display.set_mode((self.WIDTH,self.HEIGHT))
         pygame.display.set_caption("Yuval - Pong Game")
 
-        self.showStart()
-        if self.sentName:
-            self.showGame()
+        self.leftPlayerPoints = '0'
+        self.rightPlayerPoints = '0'
 
-
-    def showStart(self):
-        self.sentName = False
-        self.name = ''
-        uppercase = False
-        boldFont = pygame.font.Font(fr'{self.FOLDER_LOCATION}\Fonts\Assistant-ExtraBold.ttf', 35)
-        mediumFont = pygame.font.Font(fr'{self.FOLDER_LOCATION}\Fonts\Assistant-Medium.ttf', 20)
-        
-        sendNameButton = Button(fr'{self.FOLDER_LOCATION}\Images\EnterName.png', self.WIDTH / 2 - 100, self.HEIGHT / 2 + 100)
-
-
-        enterName = boldFont.render("Enter Name", 1, (255, 255, 255))
-        nameText = mediumFont.render("...", 1, (255, 255, 255))
-
-        sending = True
-        while sending:
-            
-            for event in pygame.event.get():
-                if event.type == MOUSEBUTTONDOWN and event.button == 1:
-                    cursorX, cursorY = pygame.mouse.get_pos()
-                    if sendNameButton.checkPressed(cursorX, cursorY):
-                        self.sentName = True
-                        sending = False
-                        break
-                elif event.type == KEYDOWN:
-                    if event.key == K_DELETE or event.key == K_BACKSPACE:
-                        self.name = self.name[0:len(self.name)-1]
-                    elif event.key == K_CAPSLOCK:
-                        uppercase = not uppercase
-                    else:
-                        if pygame.key.name(event.key) in 'abcdefghijklmnopqrstuvwxyz0123456789':
-                            if uppercase:
-                                self.name += pygame.key.name(event.key).upper()
-                            else:
-                                self.name += pygame.key.name(event.key)
-            nameText = mediumFont.render(self.name, 1, (255, 255, 255))
-
-            self.surface.fill((0, 0, 0))
-            sendNameButton.displayButton()
-            pygame.display.get_surface().blit(enterName, ((self.HEIGHT / 2) + 175, self.HEIGHT / 2 - 60))
-            pygame.display.get_surface().blit(nameText, ((self.WIDTH / 2) - 50, self.HEIGHT / 2 ))
-                     
-            pygame.display.flip()
-        
-
+        self.showGame()
 
     def showGame(self):
+        '''
+        Method used to control the game. Sends moves to server.
+        '''
 
         gameFlag = True
-        self.madeByFlag = False
-        #  Modes can be "Offline", "MultiPlayer", "Impossible"
-        self.selectedMode = ""
-        
         clock = pygame.time.Clock()
-    
-        self.gameManager = GameManager()
-        self.firstPlayer = self.gameManager.firstPlayer
-        self.secondPlayer = self.gameManager.secondPlayer
-        self.ball = self.gameManager.ball
-        impossiblePlayer = self.gameManager.impossiblePlayer
+        
+        self.players = Player(self.rightPlayerColor, self.leftPlayerColor)
+        self.ball = Ball()
 
-        self.buttonMultiPlayer = Button(fr'{self.FOLDER_LOCATION}\Images\MultiPlayer.png',
-                                     self.WIDTH / 2 + 100, self.HEIGHT / 2 + 100)
-        self.buttonOffline = Button(fr'{self.FOLDER_LOCATION}\Images\Offline.png', 
-                            self.WIDTH / 2 - 100, self.HEIGHT / 2 + 200)
-        self.buttonImpossible = Button(fr'{self.FOLDER_LOCATION}\Images\Impossible.png', 
-                            self.WIDTH / 2 - 300, self.HEIGHT / 2 + 100)
+        self.players.displayBasic()
+        self.ball.displayBasic()
+        self.scoreDisplay()
         
         pygame.display.flip()
-        while gameFlag:
-            clock.tick(120)
-            for event in pygame.event.get():
+        i=0
+        if i==0:
+            threading.Thread(target=self.showScreen).start()
+            i+=1
 
-                if event.type == MOUSEBUTTONDOWN and event.button == 1:
-                    cursorX, cursorY = pygame.mouse.get_pos()
-                    if self.gameManager.canSelect:
-                        if self.buttonImpossible.checkPressed(cursorX, cursorY):
-                            self.selectedMode = "Impossible"
-                            self.gameManager.resetScore()
-                        elif self.buttonMultiPlayer.checkPressed(cursorX, cursorY):
-                            self.selectedMode = "MultiPlayer"
-                            self.gameManager.resetScore()
-                        elif self.buttonOffline.checkPressed(cursorX, cursorY):
-                            self.selectedMode = "Offline" 
-                            self.gameManager.resetScore()
+        while gameFlag:
+            clock.tick(60)
+            
+            for event in pygame.event.get():
 
                 if event.type == QUIT:
                     gameFlag = False
 
             keys = pygame.key.get_pressed()
-
             if keys[K_RETURN]:
-                self.ball.startBall()
-                self.madeByFlag = True
-                self.gameManager.canSelect = False
-            if keys[K_w]:
-                self.firstPlayer.movePlayer("UP")
-            elif keys[K_s]:
-                self.firstPlayer.movePlayer("DOWN")
-            if self.selectedMode == "Offline":
-                if keys[K_UP]:
-                    self.secondPlayer.movePlayer("UP")
-                elif keys[K_DOWN]:
-                    self.secondPlayer.movePlayer("DOWN")        
+                if not self.ball.startBallFlag:
+                    self.client.send(("startball").encode())
+                    self.ball.startBallFlag = True
+                
+            if keys[K_UP]:
+                y=self.players.movePlayer("UP", self.playerNum)
+                self.client.send((str(self.playerNum)+":"+str(y)+"---").encode())
 
-            self.surface.fill((0, 0, 0))
+            elif keys[K_DOWN]:
+                y=self.players.movePlayer("DOWN", self.playerNum)
+                self.client.send((str(self.playerNum)+":"+str(y)+"---").encode())
 
-            #  Check if game started, if not move the ball
-            if self.ball.startBallFlag:
-                self.ball.moveBall()
-            #  If game did not start, show "Press Enter to start"
-            if not self.ball.startBallFlag:
-                self.gameManager.startingGameAlert()
-                self.buttonMultiPlayer.displayButton()     
-                self.buttonOffline.displayButton()           
-                self.buttonImpossible.displayButton()
-                #  Only for the first time, show "Made By Yuval"
-                if not self.madeByFlag:
-                    self.gameManager.madeByDisplay()
-            #  After first time, show score (and not "Made by Yuval")
-            if self.selectedMode == "Impossible":
-                impossiblePlayer.moveImpossible()
-            self.gameManager.checkCollision()
-
-            self.showScreen()
+            
 
     def showScreen(self):
-            if self.madeByFlag:
-                self.gameManager.scoreDisplay()
-            if self.selectedMode == "Offline":
-                self.buttonOffline.displayState(self.selectedMode)
-            elif self.selectedMode == "MultiPlayer":
-                self.buttonMultiPlayer.displayState(self.selectedMode)
-            elif self.selectedMode == "Impossible":
-                self.buttonImpossible.displayState(self.selectedMode)
-            
-            self.ball.drawBall()
-            self.firstPlayer.drawPlayer()
-            self.secondPlayer.drawPlayer()
-            
+        '''
+        Displays Everything in the screen. Also recieves the moves and displays them.
+        '''
+        
+        while True:
+            self.surface.fill((0, 0, 0))
+
+            self.scoreDisplay() 
+            move = self.client.recv(1024).decode()
+
+            try:
+                moves = move.split('---')[0:-1]
+                
+                for move in moves:
+                    if "SCORE" in move:
+                        move = move.split(':')
+                        self.leftPlayerPoints = move[1]
+                        self.rightPlayerPoints = move[2]
+                        self.ball.startBallFlag = False
+                        self.players.displayBasic()
+                        self.ball.displayBasic()
+                    else:
+                        self.players.drawPlayer(move)
+                        self.ball.drawBall(move)
+        
+            except:
+                pass
+
+            time.sleep(0.02)      
             pygame.display.flip()
-GUI()
+
+    def scoreDisplay(self):
+        '''
+        Displays the Score specificly. Being called in showScreen()
+        '''
+
+        scoreFont = pygame.font.Font(rf'{self.FOLDER_LOCATION}\Fonts\Assistant-ExtraBold.ttf', 50)
+        pointFont = pygame.font.Font(rf'{self.FOLDER_LOCATION}\Fonts\Assistant-Medium.ttf', 30)
+        scoreText = scoreFont.render("SCORE", 1, (255, 255, 255))
+        leftPlayerTXT = pointFont.render(self.leftPlayerPoints.encode(), 1, (255, 255, 25))
+        rightPlayerTXT = pointFont.render(self.rightPlayerPoints.encode(), 1, (255, 255, 25))
+
+        pygame.display.get_surface().blit(scoreText, ((self.WIDTH / 2) - 75, 30 ))
+        pygame.display.get_surface().blit(leftPlayerTXT, ((self.WIDTH / 2) - 150, 90 ))
+        pygame.display.get_surface().blit(rightPlayerTXT, ((self.WIDTH / 2) + 150, 90 ))
+    
+if __name__ == '__main__':
+    GUI()

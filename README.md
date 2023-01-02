@@ -1,7 +1,16 @@
 <h1 align="center">🏓 Pong Game ϟ Python</h1>
-<h3 align="center">A game made with Pygame</h3>
+<h3 align="center">A Pong game made with Pygame</h3>
 
-- **Game Modes:** Offline, Impossible, Online (soon)
+**About The Game**
+- Pong Online Game (2 Players)
+- Made in Python, using Pygame Library by Yuval Goldberger.
+
+**Running The Game**
+- One runs "run_both.bat" (Server + Client), another pc runs "run.bat" (only Client) - Needs to be on the same internet connection.
+
+**Keys**
+- *Movement*: Up, Down
+- *Start Game*: Enter
 
 <p align="left">
 </p>
